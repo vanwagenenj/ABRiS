@@ -18,6 +18,7 @@ package za.co.absa.abris.avro.registry
 
 import io.confluent.kafka.serializers.subject.{RecordNameStrategy, TopicNameStrategy, TopicRecordNameStrategy}
 import org.apache.avro.Schema
+import io.confluent.kafka.schemaregistry.ParsedSchema
 
 /**
  * Represents Confluent Schema Registry Subject created using naming strategy
@@ -39,7 +40,7 @@ object SchemaSubject{
     topicName: String,
     isKey: Boolean = false
   ): SchemaSubject = {
-    val dummySchema = createDummySchema("name", "namespace")
+    val dummySchema: ParsedSchema = createDummySchema("name", "namespace")
     new SchemaSubject(TOPIC_NAME_STRATEGY.subjectName(topicName, isKey, dummySchema))
   }
 
@@ -47,14 +48,14 @@ object SchemaSubject{
     recordName: String,
     recordNamespace: String
   ): SchemaSubject = {
-    val dummySchema = createDummySchema(recordName, recordNamespace)
+    val dummySchema: ParsedSchema = createDummySchema(recordName, recordNamespace)
     new SchemaSubject(RECORD_NAME_STRATEGY.subjectName("", false, dummySchema))
   }
 
   def usingRecordNameStrategy(
     schema: Schema
   ): SchemaSubject = {
-    new SchemaSubject(RECORD_NAME_STRATEGY.subjectName("", false, schema))
+    new SchemaSubject(RECORD_NAME_STRATEGY.subjectName("", false, schema.asInstanceOf[ParsedSchema]))
   }
 
   def usingTopicRecordNameStrategy(
@@ -62,7 +63,7 @@ object SchemaSubject{
     recordName: String,
     recordNamespace: String
   ): SchemaSubject = {
-    val dummySchema = createDummySchema(recordName, recordNamespace)
+    val dummySchema: ParsedSchema = createDummySchema(recordName, recordNamespace)
     new SchemaSubject(TOPIC_RECORD_NAME_STRATEGY.subjectName(topicName, false, dummySchema))
   }
 
@@ -70,9 +71,9 @@ object SchemaSubject{
     topicName: String,
     schema: Schema
   ): SchemaSubject = {
-    new SchemaSubject(TOPIC_RECORD_NAME_STRATEGY.subjectName(topicName, false, schema))
+    new SchemaSubject(TOPIC_RECORD_NAME_STRATEGY.subjectName(topicName, false, schema.asInstanceOf[ParsedSchema]))
   }
 
-  private def createDummySchema(name: String, namespace: String) =
-    Schema.createRecord(name, "", namespace, false)
+  private def createDummySchema(name: String, namespace: String): ParsedSchema =
+    Schema.createRecord(name, "", namespace, false).asInstanceOf[ParsedSchema]
 }
